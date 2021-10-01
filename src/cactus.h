@@ -2,6 +2,8 @@
 #define CACTUS_H
 
 #include<stdint.h>
+#include<stdio.h>
+#include<stdlib.h>
 #include<stdarg.h>
 
 typedef struct scm_object_t{
@@ -26,6 +28,10 @@ extern scm_object null_object;
 
 typedef struct cactus_runtime_controller_t{
     scm_pair symbol_intern;
+    scm_object *all_objects;
+    size_t all_objects_area_size;
+    size_t all_objects_size;
+    scm_list gc_roots;
 } *cactus_runtime_controller;
 
 typedef scm_object (*primitive_procedure)(cactus_runtime_controller,int, scm_object*);
@@ -70,4 +76,6 @@ scm_object cact_cdr(cactus_runtime_controller controller, int n_args,scm_object 
 scm_object cact_set_car(cactus_runtime_controller controller, int n_args,scm_object *arg_array);
 scm_object cact_set_cdr(cactus_runtime_controller controller, int n_args,scm_object *arg_array);
 
+//to replace
+scm_object simple_read(FILE* file, cactus_runtime_controller controller);
 #endif
