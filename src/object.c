@@ -28,6 +28,14 @@ int fixnum_p(scm_object object){
     return object->type == TYPE_FIX_NUM;
 }
 
+scm_object make_primitive(primitive_procedure fn){
+    return make_const_scm_object(TYPE_PRIMITIVE, (uintptr_t)fn);
+}
+
+int primitive_p(scm_object object){
+    return ref_object_type(object) == TYPE_PRIMITIVE;
+}
+
 int null_p(scm_object object){
     return object == null_object;
 }
