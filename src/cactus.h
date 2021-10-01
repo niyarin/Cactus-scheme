@@ -22,12 +22,18 @@ extern scm_object null_object;
 
 scm_object make_scm_object(char type, uintptr_t ptr);
 scm_object make_fixnum(intptr_t c_int);
+int fixnum_p(scm_object object);
 
 scm_object make_pair(scm_object car, scm_object cdr);
 scm_object ref_car(scm_object pair);
 scm_object ref_cdr(scm_object pair);
 void set_car(scm_object pair, scm_object obj);
 void set_cdr(scm_object pair, scm_object obj);
+int pair_p(scm_object object);
 
 scm_object make_symbol(char* c_str);
+int symbol_p(scm_object object);
+
+
+int null_p(scm_object object);
 #endif

@@ -23,3 +23,7 @@ void set_car(scm_object pair, scm_object obj){
 void set_cdr(scm_object pair, scm_object obj){
     ((pair_cell)pair->value)->cdr = obj;
 }
+
+int pair_p(scm_object object){
+    return object->type == TYPE_PAIR;
+}
