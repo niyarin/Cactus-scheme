@@ -12,8 +12,9 @@ void simple_write(FILE *file, scm_object obj){
         fprintf(file,")");
     }else if (obj->type == TYPE_SYMBOL){
         fprintf(file, "%s", (char*)obj->value);
+    }else if (obj->type == TYPE_NULL){
+        fprintf(file, "()");
     }
-
 }
 
 int main(void){
@@ -27,5 +28,9 @@ int main(void){
 
     simple_write(stdout, make_symbol("hello"));
     printf("\n");
+
+    simple_write(stdout, null_object);
+    printf("\n");
+
     return 0;
 }

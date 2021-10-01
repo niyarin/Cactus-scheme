@@ -1,6 +1,9 @@
 #include<stdlib.h>
 #include "cactus.h"
 
+struct scm_object_t null_entity = {TYPE_NULL, 0};
+scm_object null_object = (scm_object)&null_entity;
+
 scm_object make_scm_object(char type, uintptr_t ptr){
    scm_object res = (scm_object)malloc(sizeof(struct scm_object_t));
    res->type = type;
