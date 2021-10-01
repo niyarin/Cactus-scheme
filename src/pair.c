@@ -1,12 +1,15 @@
 #include<stdlib.h>
-#include "cactus.h"
 #include<assert.h>
+#include "cactus.h"
 
-scm_object make_pair(scm_object car, scm_object cdr){
+scm_object make_pair(cactus_runtime_controller controller, scm_object car, scm_object cdr){
     pair_cell cell = (pair_cell)malloc(sizeof(struct pair_cell_t));
+    if (!cell){
+        exit(1);
+    }
     cell->car = car;
     cell->cdr = cdr;
-    return make_scm_object(TYPE_PAIR, (uintptr_t)cell);
+    return make_scm_object(controller, TYPE_PAIR, (uintptr_t)cell);
 }
 
 scm_object ref_car(scm_object pair){

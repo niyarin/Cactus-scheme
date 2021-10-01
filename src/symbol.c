@@ -2,12 +2,12 @@
 #include<assert.h>
 #include "cactus.h"
 
-scm_object make_symbol(char* c_str){
-    return make_scm_object(TYPE_SYMBOL, (uintptr_t)c_str);
+scm_object make_symbol(cactus_runtime_controller controller, char* c_str){
+    return make_scm_object(controller, TYPE_SYMBOL, (uintptr_t)c_str);
 }
 
-scm_object make_const_symbol(char* c_str){
-    return make_const_scm_object(TYPE_SYMBOL, (uintptr_t)c_str);
+scm_object make_const_symbol(cactus_runtime_controller controller, char* c_str){
+    return make_const_scm_object(controller, TYPE_SYMBOL, (uintptr_t)c_str);
 }
 
 int symbol_p(scm_object object){
@@ -40,14 +40,14 @@ scm_object search_intern_box(scm_symbol symbol, scm_pair intern_box){
     return cell;
 }
 
-scm_object symbol_intern(scm_symbol symbol, scm_pair intern_box){
+scm_object symbol_intern(cactus_runtime_controller controller, scm_symbol symbol){
     assert(symbol_p(symbol));
-    assert(pair_p(intern_box));
-    scm_list ls = ref_car(intern_box);
+    assert(pair_p(controller->symbol_intern));
+    scm_list ls = ref_car(controller->symbol_intern);
 
-    scm_object search_res = search_intern_box(symbol, intern_box);
+    scm_object search_res = search_intern_box(symbol, controller->symbol_intern);
     if (null_p(search_res)){
-        set_car(intern_box, make_pair(symbol, ls));
+        set_car(controller->symbol_intern, make_pair(controller, symbol, ls));
         return symbol;
     }
     return search_res;

@@ -15,7 +15,7 @@ static int delimiter_p(char c){
 
 static scm_object simple_read_list(FILE* file, cactus_runtime_controller controller){
     getc(file);//read '('
-    scm_object res_cell_top = make_pair(null_object, null_object),
+    scm_object res_cell_top = make_pair(controller, null_object, null_object),
                res_cell = res_cell_top;
 
     while (1){
@@ -26,7 +26,7 @@ static scm_object simple_read_list(FILE* file, cactus_runtime_controller control
         }
         ungetc(first_c, file);
         scm_object obj = simple_read(file,controller);
-        set_cdr(res_cell,make_pair(null_object,null_object));
+        set_cdr(res_cell,make_pair(controller, null_object,null_object));
         res_cell = ref_cdr(res_cell);
         set_car(res_cell, obj);
     }
@@ -63,10 +63,10 @@ static scm_object simple_read_non_pair(FILE* file, cactus_runtime_controller con
     if (number_literal_flag){
         int n = atoi(buff);
         free(buff);
-        return make_fixnum(n);
+        return make_fixnum(controller, n);
     }else{
-        scm_symbol symbol =  make_symbol(buff);
-        return symbol_intern(symbol, controller->symbol_intern);
+        scm_symbol symbol =  make_symbol(controller, buff);
+        return symbol_intern(controller, symbol);
     }
 }
 
