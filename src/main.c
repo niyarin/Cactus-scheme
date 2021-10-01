@@ -16,6 +16,10 @@ void simple_write(FILE *file, scm_object obj){
         fprintf(file, "%s", (char*)obj->value);
     }else if (obj->type == TYPE_NULL){
         fprintf(file, "()");
+    }else if (obj->type == TYPE_PRIMITIVE){
+        fprintf(file, "#<primitive-procedure>");
+    }else{
+        fprintf(file, "#<??>");
     }
 }
 
@@ -142,8 +146,11 @@ scm_object simple_calc(scm_object expression){
 }
 
 void boot(scm_pair intern_box){
-    symbol_intern(make_const_symbol("+"), intern_box);
-    symbol_intern(make_const_symbol("*"), intern_box);
+    symbol_intern(make_const_symbol("cons"), intern_box);
+    symbol_intern(make_const_symbol("car"), intern_box);
+    symbol_intern(make_const_symbol("cdr"), intern_box);
+    symbol_intern(make_const_symbol("set-car!"), intern_box);
+    symbol_intern(make_const_symbol("set-cdr!"), intern_box);
 }
 
 int main(void){
@@ -155,6 +162,13 @@ int main(void){
     scm_object input = simple_read(stdin, intern_box);
     //scm_object evaled = simple_calc(input);
     //simple_write(stdout,evaled);
-    printf("\n");
+    struct cactus_runtime_controller_t controller;
+
+    scm_object x = make_pair( make_const_symbol("OK1"), make_const_symbol("OK2"));
+    scm_object y = make_primitive(&cact_cdr);
+    scm_object z =  call_scm_primitive(&controller, y, 1 ,x);
+    simple_write(stdout,x); printf("\n");
+    simple_write(stdout,y); printf("\n");
+    simple_write(stdout,z); printf("\n");
     return 0;
 }
