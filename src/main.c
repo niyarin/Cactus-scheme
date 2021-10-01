@@ -27,9 +27,9 @@ static int delimiter_p(char c){
     return c == '(' || c == ')'  || space_p(c);
 }
 
-scm_object simple_read(FILE* file);
+scm_object simple_read(FILE* file, scm_pair intern_box);
 
-static scm_object simple_read_list(FILE* file){
+static scm_object simple_read_list(FILE* file, scm_pair intern_box){
     getc(file);//read '('
     scm_object res_cell_top = make_pair(null_object, null_object),
                res_cell = res_cell_top;
@@ -41,15 +41,14 @@ static scm_object simple_read_list(FILE* file){
             return ref_cdr(res_cell_top);
         }
         ungetc(first_c, file);
-        scm_object obj = simple_read(file);
-        //res_cell = make_pair(obj, res_cell);
+        scm_object obj = simple_read(file,intern_box);
         set_cdr(res_cell,make_pair(null_object,null_object));
         res_cell = ref_cdr(res_cell);
         set_car(res_cell, obj);
     }
 }
 
-static scm_object simple_read_non_pair(FILE* file){
+static scm_object simple_read_non_pair(FILE* file, scm_pair intern_box){
     size_t buff_size = 32;
     char* buff = (char*)malloc(buff_size + 1);
 
@@ -82,19 +81,20 @@ static scm_object simple_read_non_pair(FILE* file){
         free(buff);
         return make_fixnum(n);
     }else{
-        return make_symbol(buff);
+        scm_symbol symbol =  make_symbol(buff);
+        return symbol_intern(symbol, intern_box);
     }
 }
 
-scm_object simple_read(FILE* file){
+scm_object simple_read(FILE* file, scm_pair intern_box){
     char first_c;
     while (space_p(first_c = getc(file)));
     ungetc(first_c, file);
 
     if (first_c == '('){
-        return simple_read_list(file);
+        return simple_read_list(file, intern_box);
     }else{
-        return simple_read_non_pair(file);
+        return simple_read_non_pair(file, intern_box);
     }
 }
 
@@ -141,11 +141,20 @@ scm_object simple_calc(scm_object expression){
     return make_fixnum(0);
 }
 
+void boot(scm_pair intern_box){
+    symbol_intern(make_const_symbol("+"), intern_box);
+    symbol_intern(make_const_symbol("*"), intern_box);
+}
+
 int main(void){
     printf("Hello cactus.\n");
-    scm_object input = simple_read(stdin);
-    scm_object evaled = simple_calc(input);
-    simple_write(stdout,evaled);
+
+    scm_pair intern_box = make_pair(null_object, null_object);
+    boot(intern_box);
+
+    scm_object input = simple_read(stdin, intern_box);
+    //scm_object evaled = simple_calc(input);
+    //simple_write(stdout,evaled);
     printf("\n");
     return 0;
 }
