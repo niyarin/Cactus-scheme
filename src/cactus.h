@@ -9,6 +9,7 @@
 typedef struct scm_object_t{
     uint8_t type;
     uint8_t value_is_not_reference;
+    uint8_t mark;
     uintptr_t value;
 } *scm_object;
 
@@ -17,12 +18,20 @@ typedef struct scm_object_t{
 #define scm_symbol scm_object
 #define scm_non_interned_symbol scm_object
 #define scm_primitive scm_object
+#define scm_ephemeron scm_object
 
 
 typedef struct pair_cell_t{
     void* car;
     void* cdr;
 } *pair_cell;
+
+
+typedef struct ephemeron_cell_t{
+    void* key;
+    void* datum;
+    char broken;
+} *ephemeron_cell;
 
 extern scm_object null_object;
 
@@ -41,30 +50,38 @@ typedef scm_object (*primitive_procedure)(cactus_runtime_controller,int, scm_obj
 #define TYPE_SYMBOL 2
 #define TYPE_NULL 3
 #define TYPE_PRIMITIVE 4
+#define TYPE_EPHEMERON 5
 
-scm_object make_scm_object(char type, uintptr_t ptr);
-scm_object make_const_scm_object(char type, uintptr_t value);
+scm_object make_scm_object(cactus_runtime_controller controller, char type, uintptr_t ptr);
+scm_object make_const_scm_object(cactus_runtime_controller controller, char type, uintptr_t value);
 
 #define ref_object_type(o) (o->type)
 #define ref_object_value(o) (o->value)
 
-scm_object make_fixnum(intptr_t c_int);
+scm_object make_fixnum(cactus_runtime_controller controller,intptr_t c_int);
 int fixnum_p(scm_object object);
 
-scm_object make_pair(scm_object car, scm_object cdr);
+//pair
+scm_object make_pair(cactus_runtime_controller controller, scm_object car, scm_object cdr);
 scm_object ref_car(scm_object pair);
 scm_object ref_cdr(scm_object pair);
 void set_car(scm_object pair, scm_object obj);
 void set_cdr(scm_object pair, scm_object obj);
 int pair_p(scm_object object);
 
-scm_object make_symbol(char* c_str);
-scm_object make_const_symbol(char* c_str);
+
+scm_object make_ephemeron(cactus_runtime_controller controller, scm_object key, scm_object datum);
+scm_object ephemeron_key(scm_ephemeron ephemeron);
+scm_object ephemeron_datum(scm_ephemeron ephemeron);
+int ephemeron_p(scm_object object);
+
+scm_object make_symbol(cactus_runtime_controller controller, char* c_str);
+scm_object make_const_symbol(cactus_runtime_controller controller, char* c_str);
 int symbol_p(scm_object object);
 int simple_symbol_eq(scm_object symbol1, scm_object symbol2);
-scm_object symbol_intern(scm_symbol symbol, scm_pair intern_box);
+scm_object symbol_intern(cactus_runtime_controller controller, scm_symbol symbol);
 
-scm_object make_primitive(primitive_procedure fn);
+scm_object make_primitive(cactus_runtime_controller controller, primitive_procedure fn);
 int primitive_p(scm_object object);
 
 int null_p(scm_object object);
@@ -76,6 +93,9 @@ scm_object cact_cdr(cactus_runtime_controller controller, int n_args,scm_object 
 scm_object cact_set_car(cactus_runtime_controller controller, int n_args,scm_object *arg_array);
 scm_object cact_set_cdr(cactus_runtime_controller controller, int n_args,scm_object *arg_array);
 
+void add_all_objects(cactus_runtime_controller controller, scm_object object);
+void gc_add_root(cactus_runtime_controller controller, scm_object object);
+void gc_reset_mark(cactus_runtime_controller controller);
 //to replace
 scm_object simple_read(FILE* file, cactus_runtime_controller controller);
 #endif
