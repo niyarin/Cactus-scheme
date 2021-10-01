@@ -10,7 +10,10 @@ void simple_write(FILE *file, scm_object obj){
         fprintf(file," . ");
         simple_write(file,ref_cdr(obj));
         fprintf(file,")");
+    }else if (obj->type == TYPE_SYMBOL){
+        fprintf(file, "%s", (char*)obj->value);
     }
+
 }
 
 int main(void){
@@ -20,6 +23,9 @@ int main(void){
 
     simple_write(stdout, make_pair(make_pair(make_fixnum(0),make_fixnum(1)),
                                    make_fixnum(2)));
+    printf("\n");
+
+    simple_write(stdout, make_symbol("hello"));
     printf("\n");
     return 0;
 }

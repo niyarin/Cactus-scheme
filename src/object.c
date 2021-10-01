@@ -11,3 +11,7 @@ scm_object make_scm_object(char type, uintptr_t ptr){
 scm_object make_fixnum(intptr_t c_int){
     return make_scm_object(TYPE_FIX_NUM, c_int);
 }
+
+scm_object make_symbol(char* c_str){
+    return make_scm_object(TYPE_SYMBOL, (uintptr_t)c_str);
+}

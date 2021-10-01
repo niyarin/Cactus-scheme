@@ -26,4 +26,5 @@ scm_object ref_cdr(scm_object pair);
 void set_car(scm_object pair, scm_object obj);
 void set_cdr(scm_object pair, scm_object obj);
 
+scm_object make_symbol(char* c_str);
 #endif
