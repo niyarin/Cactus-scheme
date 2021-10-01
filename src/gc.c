@@ -60,13 +60,7 @@ void gc_mark_phase(cactus_runtime_controller controller){
     controller->ephemeron_queue =
         (scm_object*)malloc(controller->ephemeron_queue_area_size * sizeof(scm_object));
     controller->ephemeron_queue_size = 0;
-
-    scm_object root_cell = controller->gc_roots;
-    while (!null_p(root_cell)){
-        assert(pair_p(root_cell));
-        gc_mark_loop(controller, ref_car(root_cell));
-        root_cell = ref_cdr(root_cell);
-    }
+    gc_mark_loop(controller, controller->gc_roots);
 }
 
 void ephemeron_mark(cactus_runtime_controller controller){
@@ -105,20 +99,20 @@ void apply_ephemeron_break(cactus_runtime_controller controller){
 static void gc_free(scm_object obj){
     char type = ref_object_type(obj);
     if (type == TYPE_PAIR){
-        free(ref_object_value(obj));
-        free(obj);
+        free((void*)(ref_object_value(obj)));
+        free((void*)obj);
     }else if (type == TYPE_EPHEMERON){
-        free(ref_object_value(obj));
+        free((void*)(ref_object_value(obj)));
         free(obj);
     }else if (type == TYPE_SYMBOL){
         if (!obj-> value_is_not_reference){
-            free(ref_object_value(obj));
+            free((void*)(ref_object_value(obj)));
         }
-        free(obj);
+        free((void*)obj);
     }else if (type == TYPE_NULL){
         //
     }else{
-        free(obj);
+        free((void*)obj);
     }
 }
 
