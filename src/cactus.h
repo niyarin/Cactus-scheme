@@ -34,6 +34,5 @@ int pair_p(scm_object object);
 scm_object make_symbol(char* c_str);
 int symbol_p(scm_object object);
 
-
 int null_p(scm_object object);
 #endif

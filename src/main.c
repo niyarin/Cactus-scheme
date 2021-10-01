@@ -98,9 +98,54 @@ scm_object simple_read(FILE* file){
     }
 }
 
+int plus_ope_p(scm_object obj){
+    if (symbol_p(obj)){
+        char* val = (char*)obj->value;
+        return val[0] == '+' && val[1] == '\0';
+    }
+    return 0;
+}
+
+int mul_ope_p(scm_object obj){
+    if (symbol_p(obj)){
+        char* val = (char*)obj->value;
+        return val[0] == '*' && val[1] == '\0';
+    }
+    return 0;
+}
+
+scm_object simple_calc(scm_object expression){
+    if (pair_p(expression)){
+        scm_object ope = ref_car(expression);
+        scm_object args = ref_cdr(expression);
+        if (mul_ope_p(ope)){
+            int res_val = 1;
+            while (!null_p(args)){
+                res_val *= (simple_calc(ref_car(args)))->value;
+                args = ref_cdr(args);
+            }
+            return make_fixnum(res_val);
+        }else if (plus_ope_p(ope)){
+            int res_val = 0;
+            while (!null_p(args)){
+                res_val += (simple_calc(ref_car(args)))->value;
+                args = ref_cdr(args);
+            }
+            return make_fixnum(res_val);
+        }else{
+            return make_fixnum(0);
+        }
+    }else if (fixnum_p(expression)){
+        return expression;
+    }
+    return make_fixnum(0);
+}
+
 int main(void){
     printf("Hello cactus.\n");
-    simple_write(stdout,simple_read(stdin));
+    scm_object input = simple_read(stdin);
+    scm_object evaled = simple_calc(input);
+    simple_write(stdout,evaled);
     printf("\n");
     return 0;
 }
