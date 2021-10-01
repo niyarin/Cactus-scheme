@@ -22,7 +22,7 @@ scm_object call_scm_primitive(cactus_runtime_controller controller, scm_primitiv
 
 scm_object cact_cons(cactus_runtime_controller controller, int n_args,scm_object *arg_array){
     assert(n_args == 2);
-    return make_pair(arg_array[0], arg_array[1]);
+    return make_pair(controller, arg_array[0], arg_array[1]);
 }
 
 scm_object cact_car(cactus_runtime_controller controller, int n_args,scm_object *arg_array){

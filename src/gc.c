@@ -34,6 +34,9 @@ static void gc_mark(scm_object obj){
 }
 
 static void gc_mark_loop(cactus_runtime_controller controller, scm_object obj){
+    if (obj->mark){
+        return;
+    }
     gc_mark(obj);
     if (ref_object_type(obj) == TYPE_PAIR){
         gc_mark_loop(controller, ref_car(obj));
@@ -64,4 +67,77 @@ void gc_mark_phase(cactus_runtime_controller controller){
         gc_mark_loop(controller, ref_car(root_cell));
         root_cell = ref_cdr(root_cell);
     }
+}
+
+void ephemeron_mark(cactus_runtime_controller controller){
+    int i;
+    char contain_reachable_object = 0;
+    size_t old_ephemeron_eueue_size = controller->ephemeron_queue_size;
+    for (i=0;i<old_ephemeron_eueue_size;i++){
+        scm_object key_object = ephemeron_key(controller->ephemeron_queue[i]);
+        if (!null_p(key_object) && key_object->mark == 1){
+            //value以外からkeyへの参照がある
+            gc_mark_loop(controller, ephemeron_datum(controller->ephemeron_queue[i]));
+            controller->ephemeron_queue[i] = null_object;
+            contain_reachable_object = 1;
+        }
+    }
+
+    if (contain_reachable_object){
+        for (i=0;i<controller->ephemeron_queue_size;i++){
+            if (null_p(controller->ephemeron_queue[i])){
+                controller->ephemeron_queue[i] = controller->ephemeron_queue[controller->ephemeron_queue_size-1];
+                controller->ephemeron_queue[controller->ephemeron_queue_size-1] = null_object;
+                controller->ephemeron_queue_size--;
+            }
+        }
+        ephemeron_mark(controller);
+    }
+}
+
+void apply_ephemeron_break(cactus_runtime_controller controller){
+    int i;
+    for (i=0;i<controller->ephemeron_queue_size;i++){
+        ephemeron_break(controller->ephemeron_queue[i]);
+    }
+}
+
+static void gc_free(scm_object obj){
+    char type = ref_object_type(obj);
+    if (type == TYPE_PAIR){
+        free(ref_object_value(obj));
+        free(obj);
+    }else if (type == TYPE_EPHEMERON){
+        free(ref_object_value(obj));
+        free(obj);
+    }else if (type == TYPE_SYMBOL){
+        if (!obj-> value_is_not_reference){
+            free(ref_object_value(obj));
+        }
+        free(obj);
+    }else if (type == TYPE_NULL){
+        //
+    }else{
+        free(obj);
+    }
+}
+
+void sweep(cactus_runtime_controller controller){
+    int i;
+    for (i=0;i<controller-> all_objects_size;i++){
+        scm_object obj = controller->all_objects[i];
+        if (null_p(obj)){
+        }else if (!(obj->mark)){
+            gc_free(obj);
+            controller->all_objects[i] = null_object;
+        }
+    }
+}
+
+void gc(cactus_runtime_controller controller){
+    gc_reset_mark(controller);
+    gc_mark_phase(controller);
+    ephemeron_mark(controller);
+    apply_ephemeron_break(controller);
+    sweep(controller);
 }

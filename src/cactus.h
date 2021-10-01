@@ -80,6 +80,9 @@ scm_object make_ephemeron(cactus_runtime_controller controller, scm_object key, 
 scm_object ephemeron_key(scm_ephemeron ephemeron);
 scm_object ephemeron_datum(scm_ephemeron ephemeron);
 int ephemeron_p(scm_object object);
+void ephemeron_break(scm_ephemeron ephemeron);
+int ephemeron_broken_p(scm_ephemeron ephemeron);
+
 
 scm_object make_symbol(cactus_runtime_controller controller, char* c_str);
 scm_object make_const_symbol(cactus_runtime_controller controller, char* c_str);
@@ -102,6 +105,7 @@ scm_object cact_set_cdr(cactus_runtime_controller controller, int n_args,scm_obj
 void add_all_objects(cactus_runtime_controller controller, scm_object object);
 void gc_add_root(cactus_runtime_controller controller, scm_object object);
 void gc_reset_mark(cactus_runtime_controller controller);
+void gc(cactus_runtime_controller controller);
 //to replace
 scm_object simple_read(FILE* file, cactus_runtime_controller controller);
 #endif
