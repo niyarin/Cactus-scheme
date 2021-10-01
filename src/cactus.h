@@ -37,10 +37,16 @@ extern scm_object null_object;
 
 typedef struct cactus_runtime_controller_t{
     scm_pair symbol_intern;
+
     scm_object *all_objects;
     size_t all_objects_area_size;
     size_t all_objects_size;
     scm_list gc_roots;
+
+    scm_list *ephemeron_queue;
+    size_t ephemeron_queue_area_size;
+    size_t ephemeron_queue_size;
+
 } *cactus_runtime_controller;
 
 typedef scm_object (*primitive_procedure)(cactus_runtime_controller,int, scm_object*);
