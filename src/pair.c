@@ -35,3 +35,14 @@ void set_cdr(scm_object pair, scm_object obj){
 int pair_p(scm_object object){
     return object->type == TYPE_PAIR;
 }
+
+scm_object assq(scm_object key, scm_list alist){
+    scm_list cell = alist;
+    while (!null_p(cell)){
+        if (ref_car(ref_car(cell)) == key){
+            return cell;
+        }
+        cell = ref_cdr(alist);
+    }
+    return false_object;
+}
