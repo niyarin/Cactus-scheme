@@ -19,7 +19,7 @@ void gc_add_root(cactus_runtime_controller controller, scm_object object){
     controller->gc_roots = make_pair(controller, object, controller->gc_roots);
 }
 
-void gc_reset_mark(cactus_runtime_controller controller){
+static void gc_reset_mark(cactus_runtime_controller controller){
     int i;
     for (i=0;i<controller-> all_objects_size;i++){
         scm_object obj = controller->all_objects[i];
@@ -29,7 +29,7 @@ void gc_reset_mark(cactus_runtime_controller controller){
     }
 }
 
-static void gc_mark(scm_object obj){
+static void mark_object(scm_object obj){
     obj->mark = 1;
 }
 
@@ -37,7 +37,7 @@ static void gc_mark_loop(cactus_runtime_controller controller, scm_object obj){
     if (obj->mark){
         return;
     }
-    gc_mark(obj);
+    mark_object(obj);
     if (ref_object_type(obj) == TYPE_PAIR){
         gc_mark_loop(controller, ref_car(obj));
         gc_mark_loop(controller, ref_cdr(obj));
@@ -54,7 +54,7 @@ static void gc_mark_loop(cactus_runtime_controller controller, scm_object obj){
     }
 }
 
-void gc_mark_phase(cactus_runtime_controller controller){
+static void gc_mark(cactus_runtime_controller controller){
 
     controller->ephemeron_queue_area_size = 8;
     controller->ephemeron_queue =
@@ -63,7 +63,7 @@ void gc_mark_phase(cactus_runtime_controller controller){
     gc_mark_loop(controller, controller->gc_roots);
 }
 
-void ephemeron_mark(cactus_runtime_controller controller){
+static void ephemeron_mark(cactus_runtime_controller controller){
     int i;
     char contain_reachable_object = 0;
     size_t old_ephemeron_eueue_size = controller->ephemeron_queue_size;
@@ -89,7 +89,7 @@ void ephemeron_mark(cactus_runtime_controller controller){
     }
 }
 
-void apply_ephemeron_break(cactus_runtime_controller controller){
+static void apply_ephemeron_break(cactus_runtime_controller controller){
     int i;
     for (i=0;i<controller->ephemeron_queue_size;i++){
         ephemeron_break(controller->ephemeron_queue[i]);
@@ -130,7 +130,7 @@ void sweep(cactus_runtime_controller controller){
 
 void gc(cactus_runtime_controller controller){
     gc_reset_mark(controller);
-    gc_mark_phase(controller);
+    gc_mark(controller);
     ephemeron_mark(controller);
     apply_ephemeron_break(controller);
     sweep(controller);

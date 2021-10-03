@@ -8,16 +8,20 @@ scm_object call_scm_primitive(cactus_runtime_controller controller, scm_primitiv
     va_list ap;
     va_start(ap, n_args);
     scm_object* arg_array = (scm_object*)malloc(sizeof(scm_object) * n_args);
+    if (!arg_array){
+        exit(1);
+    }
 
-    int i;
-    for (i=0;i<n_args;i++){
+    for (int i=0;i<n_args;i++){
         arg_array[i] = va_arg(ap, scm_object);
     }
     va_end(ap);
 
     primitive_procedure pp = (primitive_procedure)ref_object_value(primitive);
 
-    return pp(controller, n_args, arg_array);
+    scm_object res =  pp(controller, n_args, arg_array);
+    free(arg_array);
+    return res;
 }
 
 scm_object cact_cons(cactus_runtime_controller controller, int n_args,scm_object *arg_array){
@@ -47,4 +51,14 @@ scm_object cact_set_cdr(cactus_runtime_controller controller, int n_args,scm_obj
     return null_object;
 }
 
+scm_object cact_values(cactus_runtime_controller controller,int n_args,scm_object *args_array){
+    assert(n_args >= 1);
 
+    controller->n_values = n_args-1;
+    controller->values = (scm_object)malloc(sizeof(scm_object) * (n_args-1));
+    for (int i=1;i<n_args;i++){
+
+    }
+
+    return args_array[0];
+}
