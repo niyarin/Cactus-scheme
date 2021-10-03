@@ -2,15 +2,49 @@
 #include<assert.h>
 #include "cactus.h"
 
-scm_object lookup(cactus_runtime_controller controller, scm_symbol var){
-    scm_object apair = assq(var, controller->global);
+static ScmObject lookup_local(cactus_runtime_controller controller, scm_symbol var){
+    ScmObject local_stack = controller->local_stack;
+    while (!null_p(local_stack)){
+        ScmObject found = assq(var, ref_car(local_stack));
+        if (found != false_object){
+            return found;
+        }
+        local_stack = ref_cdr(local_stack);
+    }
+    return false_object;
+}
+
+static ScmObject lookup_cell(cactus_runtime_controller controller, scm_symbol var){
+    assert(symbol_p(var));
+    ScmObject apair = lookup_local(controller, var);
+    if (apair != false_object){
+        return apair;
+    }
+
+    apair = assq(var, controller->global);//TODO:ローカルから検索する
     if (apair !=  false_object){
-        return ref_cdr(ref_car(apair));
-    }else{
-        //lookup local
+        return apair;
+    }
+
+    {//REMOVE LATOR
+        printf("\n\n");
+        simple_write(stdout, var);
+        printf("\n\n");
         assert(0);
     }
 }
+
+scm_object lookup(cactus_runtime_controller controller, scm_symbol var){
+    assert(symbol_p(var));
+    return ref_cdr(lookup_cell(controller, var));
+}
+
+void update(cactus_runtime_controller controller, scm_symbol var, ScmObject val){
+    assert(symbol_p(var));
+    ScmObject apair = lookup_cell(controller, var);
+    set_cdr(apair, val);
+}
+
 
 void add_global(cactus_runtime_controller controller,
                 scm_symbol var,
@@ -34,12 +68,12 @@ void add_global_syntax(cactus_runtime_controller controller,
                                                    ref_car(global_macro_env)));
 }
 
-scm_syntax lookup_syntax(cactus_runtime_controller controller,scm_symbol var, scm_object val){
+scm_syntax lookup_syntax(cactus_runtime_controller controller,scm_symbol var){
     scm_pair syntax_stack_cell = controller->macro_env;
-    while (null_p(syntax_stack_cell)){
+    while (!null_p(syntax_stack_cell)){
         scm_object apair = assq(var, ref_car(syntax_stack_cell));
         if (apair != false_object){
-            return ref_car(apair);
+            return ref_cdr(apair);
         }
         syntax_stack_cell = ref_cdr(syntax_stack_cell);
     }

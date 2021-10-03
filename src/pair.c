@@ -12,6 +12,12 @@ scm_object make_pair(cactus_runtime_controller controller, scm_object car, scm_o
     return make_scm_object(controller, TYPE_PAIR, (uintptr_t)cell);
 }
 
+scm_object make_list2(cactus_runtime_controller controller,
+                      ScmObject obj1,
+                      ScmObject obj2){
+    return make_pair(controller, obj1, make_pair(controller, obj2, null_object));
+}
+
 scm_object ref_car(scm_object pair){
     assert(pair_p(pair));
     return ((pair_cell)pair->value)->car;
@@ -40,9 +46,9 @@ scm_object assq(scm_object key, scm_list alist){
     scm_list cell = alist;
     while (!null_p(cell)){
         if (ref_car(ref_car(cell)) == key){
-            return cell;
+            return ref_car(cell);
         }
-        cell = ref_cdr(alist);
+        cell = ref_cdr(cell);
     }
     return false_object;
 }

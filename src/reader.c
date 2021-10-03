@@ -77,6 +77,13 @@ scm_object simple_read(FILE* file, cactus_runtime_controller controller){
 
     if (first_c == '('){
         return simple_read_list(file, controller);
+    }else if (first_c == '#'){
+        first_c = getc(file);
+        char second_c = getc(file);
+        if (second_c == '\\'){
+            char third_c = getc(file);
+            return make_char(controller, third_c);
+        }
     }else{
         return simple_read_non_pair(file, controller);
     }
