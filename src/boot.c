@@ -1,4 +1,5 @@
 #include "cactus.h"
+#include<stdlib.h>
 
 void boot_pair(cactus_runtime_controller controller){
     //cons
@@ -120,12 +121,21 @@ void boot_controller(cactus_runtime_controller controller){
     controller->local_stack = null_object;
 }
 
+void boot_load_path(){
+    const char *env_var = getenv('CACTUS_LOAD_PATH');
+    if (env_var != NULL) {
+        printf("%s\n",env_var);
+    }
+    printf("LOAD PATH!\n");
+}
+
 void boot(cactus_runtime_controller controller){
     boot_controller(controller);
     boot_pair(controller);
     boot_procedures(controller);
     boot_other_primitive(controller);
     boot_syntax(controller);
-
     boot_writer(controller);
+
+    boot_load_path();
 }
