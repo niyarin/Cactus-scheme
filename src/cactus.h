@@ -63,6 +63,7 @@ extern ScmObject syntax_call_with_values_internal_object;
 
 typedef struct cactus_runtime_controller_t{
     scm_pair symbol_intern;
+    ScmObject load_path;
 
     scm_object *all_objects;
     size_t all_objects_area_size;
@@ -151,9 +152,11 @@ int vector_length(ScmObject vector);
 ScmObject make_char(cactus_runtime_controller controller, uint32_t c);
 
 //string
-ScmObject make_string(cactus_runtime_controller controller,char* cstr);
+ScmObject make_string(cactus_runtime_controller controller,uint32_t* u32_array);
+ScmObject make_string_const(cactus_runtime_controller controller,uint32_t* u32_array);
+ScmObject make_string_from_cstr(cactus_runtime_controller controller,char* s);
+void strcopy_from_scm_str(char* buff, ScmObject scm_str);
 int string_p(scm_object object);
-char* string_to_cstr(ScmObject string);
 
 //compare
 ScmObject eq(ScmObject a, ScmObject b);

@@ -29,7 +29,13 @@ void simple_write(FILE *file, scm_object obj){
         fprintf(file, ")");
     }else if (obj->type == TYPE_STRING){
         fprintf(file, "\"");
-        fprintf(file, "%s", string_to_cstr(obj));
+        int i=0;
+        uint32_t *buff = (uint32_t*)ref_object_value(obj);
+        while (buff[i]){
+            char c = buff[i];
+            fprintf(file,"%c",c);
+            i++;
+        }
         fprintf(file, "\"");
     }else if (obj->type == TYPE_BUILT_IN_SYNTAX){
         if (obj == syntax_quote_object){

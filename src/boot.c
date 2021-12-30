@@ -1,5 +1,6 @@
 #include "cactus.h"
 #include<stdlib.h>
+#include<string.h>
 
 void boot_pair(cactus_runtime_controller controller){
     //cons
@@ -121,10 +122,61 @@ void boot_controller(cactus_runtime_controller controller){
     controller->local_stack = null_object;
 }
 
-void boot_load_path(){
+void boot_load_path_aux(cactus_runtime_controller controller,char* env_var, int left, int right){
+    uint32_t* path = (uint32_t*)malloc(sizeof(uint32_t) * (right-left) + 1);
+    for (int i=left;i<right;i++){
+        path[i-left] = env_var[i];
+    }
+    path[right-left] = 0;
+    controller->load_path = make_pair(controller,
+                                      make_string(controller, path),
+                                      controller->load_path);
+}
+
+
+void boot_load_path(cactus_runtime_controller controller){
+    controller->load_path = null_object;
     const char *env_var = getenv("CACTUS_LOAD_PATH");
     if (env_var != NULL) {
-        printf("%s\n",env_var);
+        int left = 0,
+            right = 0,
+            length = strlen(env_var);
+
+        while (right < length){
+            if (env_var[right] == ':'){
+                boot_load_path_aux(controller, env_var, left, right);
+                left = right+1;
+            }
+            right++;
+        }
+        if (left != right){
+            boot_load_path_aux(controller, env_var, left, right);
+        }
+    }
+
+    {
+        uint32_t *s = (uint32_t*)malloc(sizeof(uint32_t) * 2);
+        s[0] = '.';s[1] = 0;
+        controller->load_path = make_pair(controller,
+                                          make_string(controller, s),
+                                          controller->load_path);
+    }
+    {
+        uint32_t *s = (uint32_t*)malloc(sizeof(uint32_t) * 9);
+        s[0] = 's'; s[1] = 'h'; s[2] = 'a'; s[3] = 'r';
+        s[4] = 'e'; s[5] = '_'; s[6] = 'l'; s[7] = 'i'; s[8] = 'b';s[9] = 0;
+
+        controller->load_path = make_pair(controller,
+                                          make_string(controller, s),
+                                          controller->load_path);
+    }
+}
+
+void boot_core_lib(cactus_runtime_controller controller){
+    char libs[1][1024]  = {"cactus_base/procedure"};
+    for (int i=0;i<1;i++){
+        ScmObject name = make_string_from_cstr(controller,libs[i]);
+        load(controller, name);
     }
 }
 
@@ -136,5 +188,6 @@ void boot(cactus_runtime_controller controller){
     boot_syntax(controller);
     boot_writer(controller);
 
-    boot_load_path();
+    boot_load_path(controller);
+    boot_core_lib(controller);
 }

@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<stdio.h>
+#include<assert.h>
 
 scm_object simple_read(FILE* file, cactus_runtime_controller controller);
 
@@ -45,6 +46,7 @@ static scm_object simple_read_non_pair(FILE* file, cactus_runtime_controller con
             ungetc(c,file);
             break;
         }
+
         if (current_position == buff_size){
             buff_size *= 2;
             buff = (char*)realloc(buff, buff_size + 1);
@@ -65,12 +67,15 @@ static scm_object simple_read_non_pair(FILE* file, cactus_runtime_controller con
         free(buff);
         return make_fixnum(controller, n);
     }else if (buff[0] == '"'){
-        char *new_buff = (char*)malloc(current_position-2);
+        uint32_t *new_buff = (uint32_t*)malloc(sizeof(uint32_t) * (current_position-1));
+        if (!new_buff){
+            assert(0);
+        }
         int i;
         for (i=1;i<current_position-1;i++){
             new_buff[i-1] = buff[i];
         }
-        new_buff[current_position-1] = '\0';
+        new_buff[current_position-2] = 0;
         free(buff);
         return make_string(controller, new_buff);
     }else{

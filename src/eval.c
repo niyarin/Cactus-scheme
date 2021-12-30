@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdio.h>
 #include "cactus.h"
 
 scm_object pass_value(cactus_runtime_controller controller, scm_object value){
@@ -328,4 +329,50 @@ scm_object eval(cactus_runtime_controller controller, scm_object expression){
     scm_object solved_syntax_expression = solve_syntax(controller, expression);
     simple_write(stdout, solved_syntax_expression);printf("\n");
     return call_eval_step(controller, solved_syntax_expression);
+}
+
+static int is_exist_path_p(ScmObject path){
+    char buff[1024];
+    FILE *file;
+    strcopy_from_scm_str(buff, path);
+    if (file = fopen(buff, "r")) {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
+
+ScmObject find_load_file(cactus_runtime_controller controller, ScmObject name){
+    ScmObject path_list = controller->load_path;
+    ScmObject slash_str = make_string_from_cstr(controller, "/");
+    while (path_list != null_object){
+        ScmObject path1 = string_append(controller, 3, ref_car(path_list), slash_str, name);
+        if (is_exist_path_p(path1)){
+            return path1;
+        }
+        ScmObject path2 = string_append(controller, 4,
+                                        ref_car(path_list),
+                                        slash_str,
+                                        name,
+                                        make_string_from_cstr(controller, ".scm"));
+        if (is_exist_path_p(path2)){
+            return path2;
+        }
+        ScmObject path3 = string_append(controller, 4,
+                                        ref_car(path_list),
+                                        slash_str,
+                                        name,
+                                        make_string_from_cstr(controller, ".sld"));
+        if (is_exist_path_p(path3)){
+            return path3;
+        }
+        path_list = ref_cdr(path_list);
+    }
+}
+
+
+ScmObject load(cactus_runtime_controller controller, ScmObject name){
+    ScmObject path = find_load_file(controller, name);
+    char cpath[1024];
+    strcopy_from_scm_str(cpath, path);
 }

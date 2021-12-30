@@ -60,6 +60,11 @@ static void gc_mark(cactus_runtime_controller controller){
     controller->ephemeron_queue =
         (scm_object*)malloc(controller->ephemeron_queue_area_size * sizeof(scm_object));
     controller->ephemeron_queue_size = 0;
+    gc_mark_loop(controller, controller->global);
+    gc_mark_loop(controller, controller->macro_env);
+    gc_mark_loop(controller, controller->local_stack);
+    gc_mark_loop(controller, controller->symbol_intern);
+    gc_mark_loop(controller, controller->load_path);
     gc_mark_loop(controller, controller->gc_roots);
 }
 
