@@ -98,6 +98,7 @@ typedef scm_object (*primitive_procedure)(cactus_runtime_controller,int, scm_obj
 #define TYPE_CONTINUATION 10
 #define TYPE_PORT 11
 #define TYPE_CHAR 12
+#define TYPE_STRING 13
 
 #define SYNTAX_QUOTE_ID 0
 #define SYNTAX_LAMBDA_ID 1
@@ -148,6 +149,11 @@ int vector_length(ScmObject vector);
 
 //char
 ScmObject make_char(cactus_runtime_controller controller, uint32_t c);
+
+//string
+ScmObject make_string(cactus_runtime_controller controller,char* cstr);
+int string_p(scm_object object);
+char* string_to_cstr(ScmObject string);
 
 //compare
 ScmObject eq(ScmObject a, ScmObject b);

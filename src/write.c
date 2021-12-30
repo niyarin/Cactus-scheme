@@ -27,6 +27,10 @@ void simple_write(FILE *file, scm_object obj){
             fprintf(file, " ");
         }
         fprintf(file, ")");
+    }else if (obj->type == TYPE_STRING){
+        fprintf(file, "\"");
+        fprintf(file, "%s", string_to_cstr(obj));
+        fprintf(file, "\"");
     }else if (obj->type == TYPE_BUILT_IN_SYNTAX){
         if (obj == syntax_quote_object){
             fprintf(file, "#<QUOTE>");

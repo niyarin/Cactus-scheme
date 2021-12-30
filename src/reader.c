@@ -64,6 +64,15 @@ static scm_object simple_read_non_pair(FILE* file, cactus_runtime_controller con
         int n = atoi(buff);
         free(buff);
         return make_fixnum(controller, n);
+    }else if (buff[0] == '"'){
+        char *new_buff = (char*)malloc(current_position-2);
+        int i;
+        for (i=1;i<current_position-1;i++){
+            new_buff[i-1] = buff[i];
+        }
+        new_buff[current_position-1] = '\0';
+        free(buff);
+        return make_string(controller, new_buff);
     }else{
         scm_symbol symbol =  make_symbol(controller, buff);
         return symbol_intern(controller, symbol);

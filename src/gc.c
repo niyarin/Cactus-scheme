@@ -104,7 +104,7 @@ static void gc_free(scm_object obj){
     }else if (type == TYPE_EPHEMERON){
         free((void*)(ref_object_value(obj)));
         free(obj);
-    }else if (type == TYPE_SYMBOL){
+    }else if (type == TYPE_SYMBOL || type == TYPE_STRING){
         if (!obj-> value_is_not_reference){
             free((void*)(ref_object_value(obj)));
         }
