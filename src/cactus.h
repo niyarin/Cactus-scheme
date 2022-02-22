@@ -155,6 +155,7 @@ ScmObject make_char(cactus_runtime_controller controller, uint32_t c);
 ScmObject make_string(cactus_runtime_controller controller,uint32_t* u32_array);
 ScmObject make_string_const(cactus_runtime_controller controller,uint32_t* u32_array);
 ScmObject make_string_from_cstr(cactus_runtime_controller controller,char* s);
+ScmObject string_append(cactus_runtime_controller controller, int n_args, ...);
 void strcopy_from_scm_str(char* buff, ScmObject scm_str);
 int string_p(scm_object object);
 
