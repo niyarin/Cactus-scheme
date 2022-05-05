@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "cactus.h"
 
+
 scm_object pass_value(cactus_runtime_controller controller, scm_object value){
     if (null_p(controller->eval_stack)){
         controller->evaled = value;
@@ -229,12 +230,15 @@ scm_object eval_step(cactus_runtime_controller controller, scm_object expression
     assert(0);
 }
 
+ScmObject solve_identifier_and_syntax(cactus_runtime_controller controller, ScmObject expression){
+}
+
 scm_object solve_syntax(cactus_runtime_controller controller, scm_object expression){
     if (pair_p(expression)){
         scm_object operator = lookup_syntax(controller, ref_car(expression));
         if (operator && built_in_syntax_p(operator)){
             switch (ref_object_value(operator)){
-                case (  SYNTAX_QUOTE_ID):
+                case SYNTAX_QUOTE_ID:
                     return make_pair(controller,
                                      operator,
                                      ref_cdr(expression));
@@ -251,6 +255,7 @@ scm_object solve_syntax(cactus_runtime_controller controller, scm_object express
                         if (pair_p(ref_car(ref_cdr(expression)))){
                             assert(0);
                         }
+                        //no break
                     }
                 case SYNTAX_SET_ID:
                     {
@@ -321,21 +326,48 @@ ScmObject call_eval_step(cactus_runtime_controller controller, scm_object solved
     return controller->evaled;
 }
 
+char import_string[] = "import";
+struct scm_object_t import_symbol_entity = {TYPE_SYMBOL, 1, 0, (uintptr_t)&import_string};
+ScmObject import_symbol = (scm_object)&import_symbol_entity;
+
+char define_library[] = "define_library";
+struct scm_object_t define_library_symbol_entity = {TYPE_SYMBOL, 1, 0, (uintptr_t)&import_string};
+ScmObject define_library_symbol = (scm_object)&define_library_symbol_entity;
+
+static int import_expression_p(ScmObject expression){
+    return pair_p(expression)
+           && symbol_p(ref_car(expression))
+           && simple_symbol_eq(ref_car(expression), import_symbol);
+}
+
+static int define_library_expression_p(ScmObject expression){
+    return pair_p(expression)
+           && symbol_p(ref_car(expression))
+           && simple_symbol_eq(ref_car(expression), define_library_symbol);
+
+}
+
 scm_object eval(cactus_runtime_controller controller, scm_object expression){
     controller->eval_stack = null_object;
     controller->evaled = null_object;
     controller->un_evaled = null_object;
     controller->local_stack = null_object;
-    scm_object solved_syntax_expression = solve_syntax(controller, expression);
-    simple_write(stdout, solved_syntax_expression);printf("\n");
-    return call_eval_step(controller, solved_syntax_expression);
+    if ( import_expression_p(expression)){
+        return null_object;
+    }else if (define_library_expression_p(expression)){
+        return null_object;
+    }else{
+        scm_object solved_syntax_expression = solve_syntax(controller, expression);
+        simple_write(stdout, solved_syntax_expression);printf("\n");
+        return call_eval_step(controller, solved_syntax_expression);
+    }
 }
 
 static int is_exist_path_p(ScmObject path){
     char buff[1024];
     FILE *file;
     strcopy_from_scm_str(buff, path);
-    if (file = fopen(buff, "r")) {
+    if ((file = fopen(buff, "r"))) {
         fclose(file);
         return 1;
     }

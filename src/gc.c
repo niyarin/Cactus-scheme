@@ -19,6 +19,13 @@ void gc_add_root(cactus_runtime_controller controller, scm_object object){
     controller->gc_roots = make_pair(controller, object, controller->gc_roots);
 }
 
+void gc_remove_root(cactus_runtime_controller controller, ScmObject object){
+    ScmObject cell = memq(controller->gc_roots, object);
+    if (cell != false_object){
+        set_car(cell, null_object);
+    }
+}
+
 static void gc_reset_mark(cactus_runtime_controller controller){
     int i;
     for (i=0;i<controller-> all_objects_size;i++){

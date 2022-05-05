@@ -15,6 +15,7 @@ typedef struct scm_object_t{
 
 #define scm_pair scm_object
 #define scm_list scm_object
+#define ScmList scm_object
 #define scm_symbol scm_object
 #define scm_non_interned_symbol scm_object
 #define scm_primitive scm_object
@@ -80,6 +81,7 @@ typedef struct cactus_runtime_controller_t{
     scm_object local_stack;
 
     //namespace
+    ScmObject libraries;
     scm_object global;
     scm_object macro_env;
 } *cactus_runtime_controller;
@@ -100,6 +102,7 @@ typedef scm_object (*primitive_procedure)(cactus_runtime_controller,int, scm_obj
 #define TYPE_PORT 11
 #define TYPE_CHAR 12
 #define TYPE_STRING 13
+#define TYPE_IDENTIFIER 14
 
 #define SYNTAX_QUOTE_ID 0
 #define SYNTAX_LAMBDA_ID 1
@@ -128,11 +131,13 @@ scm_object make_pair(cactus_runtime_controller controller, scm_object car, scm_o
 scm_object make_list2(cactus_runtime_controller controller, ScmObject obj1, ScmObject obj2);
 scm_object ref_car(scm_object pair);
 #define ref_cadr(pair) ref_car(ref_cdr(pair))
+#define ref_cddr(pair) ref_cdr(ref_cdr(pair))
 scm_object ref_cdr(scm_object pair);
 void set_car(scm_object pair, scm_object obj);
 void set_cdr(scm_object pair, scm_object obj);
 int pair_p(scm_object object);
-scm_object assq(scm_list alist, scm_object key);
+ScmObject assq(ScmObject key, ScmList alist);
+ScmObject memq(ScmObject object, ScmList ls);
 
 //ephemeron
 scm_object make_ephemeron(cactus_runtime_controller controller, scm_object key, scm_object datum);
@@ -205,6 +210,7 @@ ScmObject cact_write_char(cactus_runtime_controller controller, int n_args, ScmO
 
 void add_all_objects(cactus_runtime_controller controller, scm_object object);
 void gc_add_root(cactus_runtime_controller controller, scm_object object);
+void gc_remove_root(cactus_runtime_controller controller, ScmObject object);
 void gc(cactus_runtime_controller controller);
 
 //utils
@@ -229,6 +235,7 @@ void add_global_syntax(cactus_runtime_controller controller, scm_symbol var, scm
 
 
 void boot(cactus_runtime_controller controller);
+void boot_core_lib(cactus_runtime_controller controller);
 
 //to replace
 scm_object simple_read(FILE* file, cactus_runtime_controller controller);

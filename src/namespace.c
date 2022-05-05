@@ -21,7 +21,7 @@ static ScmObject lookup_cell(cactus_runtime_controller controller, scm_symbol va
         return apair;
     }
 
-    apair = assq(var, controller->global);//TODO:ローカルから検索する
+    apair = assq(var, controller->global);
     if (apair !=  false_object){
         return apair;
     }
@@ -34,7 +34,7 @@ static ScmObject lookup_cell(cactus_runtime_controller controller, scm_symbol va
     }
 }
 
-scm_object lookup(cactus_runtime_controller controller, scm_symbol var){
+ScmObject lookup(cactus_runtime_controller controller, scm_symbol var){
     assert(symbol_p(var));
     return ref_cdr(lookup_cell(controller, var));
 }
@@ -44,7 +44,6 @@ void update(cactus_runtime_controller controller, scm_symbol var, ScmObject val)
     ScmObject apair = lookup_cell(controller, var);
     set_cdr(apair, val);
 }
-
 
 void add_global(cactus_runtime_controller controller,
                 scm_symbol var,
@@ -78,4 +77,17 @@ scm_syntax lookup_syntax(cactus_runtime_controller controller,scm_symbol var){
         syntax_stack_cell = ref_cdr(syntax_stack_cell);
     }
     return null_object;
+}
+
+ScmObject make_identifier(cactus_runtime_controller controller,scm_symbol var){
+    //return make_scm_object(controller, TYPE_STRING, (uintptr_t));
+    ScmObject apair = lookup_local(controller, var);
+    if (apair != false_object){
+        //return apair;
+    }
+
+    apair = assq(var, controller->global);
+    if (apair !=  false_object){
+        //return apair;
+    }
 }

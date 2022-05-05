@@ -117,6 +117,7 @@ void boot_controller(cactus_runtime_controller controller){
     controller->symbol_intern = intern_box;
     controller->gc_roots = null_object;
 
+    controller->libraries = null_object;
     controller->global = null_object;
     controller->macro_env = make_pair(controller,null_object,null_object);
     controller->local_stack = null_object;
@@ -180,14 +181,21 @@ void boot_core_lib(cactus_runtime_controller controller){
     }
 }
 
-void boot(cactus_runtime_controller controller){
-    boot_controller(controller);
+void boot_builtins_core(cactus_runtime_controller controller){
     boot_pair(controller);
     boot_procedures(controller);
     boot_other_primitive(controller);
     boot_syntax(controller);
-    boot_writer(controller);
+}
 
+static void boot_libraries(cactus_runtime_controller controller){
+
+}
+
+void boot(cactus_runtime_controller controller){
+    boot_controller(controller);
+    boot_builtins_core(controller);
+    boot_writer(controller);
     boot_load_path(controller);
     boot_core_lib(controller);
 }

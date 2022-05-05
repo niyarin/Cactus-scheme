@@ -42,8 +42,8 @@ int pair_p(scm_object object){
     return object->type == TYPE_PAIR;
 }
 
-scm_object assq(scm_object key, scm_list alist){
-    scm_list cell = alist;
+ScmObject assq(ScmObject key, ScmList alist){
+    ScmList cell = alist;
     while (!null_p(cell)){
         if (ref_car(ref_car(cell)) == key){
             return ref_car(cell);
@@ -51,4 +51,14 @@ scm_object assq(scm_object key, scm_list alist){
         cell = ref_cdr(cell);
     }
     return false_object;
+}
+
+ScmObject memq(ScmObject object, ScmList ls){
+  ScmList l = ls;
+  while (!null_p(l)){
+    if (ref_car(l) == object){
+      return l;
+    }
+  }
+  return false_object;
 }
