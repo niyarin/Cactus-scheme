@@ -21,11 +21,21 @@ typedef struct scm_object_t{
 #define scm_primitive scm_object
 #define scm_ephemeron scm_object
 #define scm_syntax scm_object
+
+typedef scm_object ScmBoolean;
 typedef scm_object ScmObject;
+typedef ScmObject ScmIdentifier;
+
 typedef struct pair_cell_t{
     void* car;
     void* cdr;
 } *pair_cell;
+
+typedef struct identifier_t{
+    ScmObject mark;
+    ScmObject symbol;
+    ScmObject label;
+} *Identifier;
 
 typedef struct closure{
     ScmObject formals;
@@ -113,6 +123,7 @@ typedef scm_object (*primitive_procedure)(cactus_runtime_controller,int, scm_obj
 #define SYNTAX_CALL_CC_INTERNAL_ID 6
 #define SYNTAX_CALL_WITH_VALUES_INTERNAL_ID 7
 #define SYNTAX_DYNAMIC_WIND_INTERNAL_ID 8
+#define SYNTAX_IR_MACRO_TRANSFORMER_ID 9
 
 #define PORT_FILE_OUTPUT_ID 0
 
@@ -163,6 +174,10 @@ ScmObject make_string_from_cstr(cactus_runtime_controller controller,char* s);
 ScmObject string_append(cactus_runtime_controller controller, int n_args, ...);
 void strcopy_from_scm_str(char* buff, ScmObject scm_str);
 int string_p(scm_object object);
+
+//identifier
+ScmIdentifier make_identifier(cactus_runtime_controller controller, scm_symbol symbol, ScmObject mark, ScmObject label);
+int identifier_p(scm_object object);
 
 //compare
 ScmObject eq(ScmObject a, ScmObject b);
@@ -229,7 +244,7 @@ void add_global(cactus_runtime_controller controller, scm_symbol var, scm_object
 scm_object lookup(cactus_runtime_controller controller, scm_symbol var);
 void update(cactus_runtime_controller controller, scm_symbol var, ScmObject val);
 
-scm_syntax lookup_syntax(cactus_runtime_controller controller,scm_symbol var);
+scm_syntax lookup_syntax(ScmObject macro_env ,scm_symbol var);
 
 void add_global_syntax(cactus_runtime_controller controller, scm_symbol var, scm_object val);
 

@@ -110,7 +110,7 @@ static void apply_ephemeron_break(cactus_runtime_controller controller){
 
 static void gc_free(scm_object obj){
     char type = ref_object_type(obj);
-    if (type == TYPE_PAIR){
+    if (type == TYPE_PAIR || type == TYPE_IDENTIFIER){
         free((void*)(ref_object_value(obj)));
         free((void*)obj);
     }else if (type == TYPE_EPHEMERON){
@@ -122,7 +122,6 @@ static void gc_free(scm_object obj){
         }
         free((void*)obj);
     }else if (type == TYPE_NULL){
-        //
     }else{
         free((void*)obj);
     }

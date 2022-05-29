@@ -67,8 +67,8 @@ void add_global_syntax(cactus_runtime_controller controller,
                                                    ref_car(global_macro_env)));
 }
 
-scm_syntax lookup_syntax(cactus_runtime_controller controller,scm_symbol var){
-    scm_pair syntax_stack_cell = controller->macro_env;
+scm_syntax lookup_syntax(ScmObject macro_env ,scm_symbol var){
+    scm_pair syntax_stack_cell = macro_env;
     while (!null_p(syntax_stack_cell)){
         scm_object apair = assq(var, ref_car(syntax_stack_cell));
         if (apair != false_object){
@@ -77,17 +77,4 @@ scm_syntax lookup_syntax(cactus_runtime_controller controller,scm_symbol var){
         syntax_stack_cell = ref_cdr(syntax_stack_cell);
     }
     return null_object;
-}
-
-ScmObject make_identifier(cactus_runtime_controller controller,scm_symbol var){
-    //return make_scm_object(controller, TYPE_STRING, (uintptr_t));
-    ScmObject apair = lookup_local(controller, var);
-    if (apair != false_object){
-        //return apair;
-    }
-
-    apair = assq(var, controller->global);
-    if (apair !=  false_object){
-        //return apair;
-    }
 }
