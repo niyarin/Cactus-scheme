@@ -25,6 +25,7 @@ typedef struct scm_object_t{
 typedef scm_object ScmBoolean;
 typedef scm_object ScmObject;
 typedef ScmObject ScmIdentifier;
+typedef ScmObject ScmSymbol;
 
 typedef struct pair_cell_t{
     void* car;
@@ -178,16 +179,20 @@ int string_p(scm_object object);
 //identifier
 ScmIdentifier make_identifier(cactus_runtime_controller controller, scm_symbol symbol, ScmObject mark, ScmObject label);
 int identifier_p(scm_object object);
+ScmObject ref_identifier_symbol(ScmObject identifier);
 
 //compare
 ScmObject eq(ScmObject a, ScmObject b);
 
-scm_object make_symbol(cactus_runtime_controller controller, char* c_str);
-scm_object make_const_symbol(cactus_runtime_controller controller, char* c_str);
+//symbol
+ScmSymbol make_symbol(cactus_runtime_controller controller, char* c_str);
+ScmSymbol make_const_symbol(cactus_runtime_controller controller, char* c_str);
 int symbol_p(scm_object object);
 int simple_symbol_eq(scm_object symbol1, scm_object symbol2);
-scm_object symbol_intern(cactus_runtime_controller controller, scm_symbol symbol);
+ScmSymbol symbol_intern(cactus_runtime_controller controller, ScmSymbol symbol);
+ScmSymbol rename_symbol(cactus_runtime_controller controller, ScmSymbol sym);
 
+//primitive
 scm_object make_primitive(cactus_runtime_controller controller, primitive_procedure fn);
 int primitive_p(scm_object object);
 
@@ -247,6 +252,17 @@ void update(cactus_runtime_controller controller, scm_symbol var, ScmObject val)
 scm_syntax lookup_syntax(ScmObject macro_env ,scm_symbol var);
 
 void add_global_syntax(cactus_runtime_controller controller, scm_symbol var, scm_object val);
+
+//macro
+ScmObject solve_syntax_internal(cactus_runtime_controller controller, ScmObject identifier_expression,
+                               ScmObject runtime_env, ScmObject syntax_env, ScmObject counter);
+
+ScmObject solve_syntax(cactus_runtime_controller controller,
+                       ScmObject identifier_expression);
+
+
+ScmObject convert_symbols_to_identifiers(cactus_runtime_controller controller, ScmObject expression);
+
 
 
 void boot(cactus_runtime_controller controller);

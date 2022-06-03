@@ -2,11 +2,11 @@
 #include<assert.h>
 #include "cactus.h"
 
-scm_object make_symbol(cactus_runtime_controller controller, char* c_str){
+ScmSymbol make_symbol(cactus_runtime_controller controller, char* c_str){
     return make_scm_object(controller, TYPE_SYMBOL, (uintptr_t)c_str);
 }
 
-scm_object make_const_symbol(cactus_runtime_controller controller, char* c_str){
+ScmSymbol make_const_symbol(cactus_runtime_controller controller, char* c_str){
     return make_const_scm_object(controller, TYPE_SYMBOL, (uintptr_t)c_str);
 }
 
@@ -26,7 +26,7 @@ int simple_symbol_eq(scm_non_interned_symbol symbol1,
     return strcmp(symbol_value1, symbol_value2) == 0;
 }
 
-scm_object search_intern_box(scm_symbol symbol, scm_pair intern_box){
+ScmObject search_intern_box(scm_symbol symbol, scm_pair intern_box){
     assert(symbol_p(symbol));
     assert(pair_p(intern_box));
     scm_list ls = ref_car(intern_box),
@@ -37,10 +37,10 @@ scm_object search_intern_box(scm_symbol symbol, scm_pair intern_box){
         }
         cell = ref_cdr(cell);
     }
-    return cell;
+    return null_object;
 }
 
-scm_object symbol_intern(cactus_runtime_controller controller, scm_symbol symbol){
+ScmSymbol symbol_intern(cactus_runtime_controller controller, ScmSymbol symbol){
     assert(symbol_p(symbol));
     assert(pair_p(controller->symbol_intern));
     scm_list ls = ref_car(controller->symbol_intern);
@@ -51,4 +51,24 @@ scm_object symbol_intern(cactus_runtime_controller controller, scm_symbol symbol
         return symbol;
     }
     return search_res;
+}
+
+ScmSymbol rename_symbol(cactus_runtime_controller controller, ScmSymbol sym){
+    char *str = (char*)ref_object_value(sym);
+    size_t slen = strlen(str) ;
+    char *new_str = (char*)malloc(sizeof(char) * (slen + 1));
+    strcpy(new_str, str);
+    new_str[slen+1] = '\0';
+
+    ScmSymbol res = make_symbol(controller, new_str);
+    for (int i=0;i<10;i++){
+        new_str[slen] = '0' + i;
+
+        ScmObject interned = search_intern_box(res, controller->symbol_intern);
+        if (null_p(interned)){
+            return res;
+        }
+    }
+    new_str[slen] = '*';
+    return rename_symbol(controller, res);
 }
