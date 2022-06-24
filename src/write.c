@@ -13,6 +13,7 @@ void simple_write(FILE *file, scm_object obj){
     }else if (obj->type == TYPE_SYMBOL){
         fprintf(file, "%s", (char*)obj->value);
     }else if (obj->type == TYPE_IDENTIFIER){
+        fprintf(file,"#I_");
         simple_write(file, ((Identifier)obj->value)->symbol);
     }else if (obj->type == TYPE_NULL){
         fprintf(file, "nil");

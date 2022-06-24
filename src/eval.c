@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include "cactus.h"
 
-
 scm_object pass_value(cactus_runtime_controller controller, scm_object value){
     if (null_p(controller->eval_stack)){
         controller->evaled = value;
@@ -38,7 +37,6 @@ scm_object pass_values(cactus_runtime_controller controller, scm_object values){
     controller->eval_stack = ref_cdr(controller->eval_stack);
     return vector_ref(stack_top,0);
 }
-
 
 ScmObject make_eval_stack_cell(cactus_runtime_controller controller, ScmObject expression, ScmObject evaled, ScmObject un_evaled, ScmObject local_stack){
     ScmObject res = make_vector(controller,4);
@@ -118,7 +116,7 @@ static scm_object apply_procedure_step(cactus_runtime_controller controller, scm
     return ref_car(controller->un_evaled);
 }
 
-scm_object eval_step(cactus_runtime_controller controller, scm_object expression){
+scm_object eval_step(cactus_runtime_controller controller, ScmObject expression){
     if (pair_p(expression)){
         if (ref_car(expression) == syntax_quote_object){
             return pass_value(controller, ref_car(ref_cdr(expression)));
@@ -223,6 +221,9 @@ scm_object eval_step(cactus_runtime_controller controller, scm_object expression
             return apply_procedure_step(controller, expression);
         }
     }else if (symbol_p(expression)){
+        assert(0);
+        return pass_value(controller, lookup(controller, expression));
+    }else if (identifier_p(expression)){
         return pass_value(controller, lookup(controller, expression));
     }else{
         return pass_value(controller, expression);
@@ -314,58 +315,6 @@ scm_object solve_syntax(cactus_runtime_controller controller, scm_object express
 }
 */
 
-ScmObject formals2symbol_list(cactus_runtime_controller controller, ScmObject formals){
-    if (symbol_p(formals)){
-        return make_pair(controller, formals, null_object);
-    }else if (null_p(formals)){
-        return null_object;
-    }else if (pair_p(formals)){
-        return
-            make_pair(controller,
-                      ref_car(formals),
-                      formals2symbol_list(controller, ref_cdr(formals)));
-
-    }else{
-        assert(0);
-    }
-}
-
-
-ScmObject solve_syntax_internal(cactus_runtime_controller controller, ScmObject identifier_expression,
-                               ScmObject runtime_env, ScmObject syntax_env, ScmObject counter){
-    if (pair_p(identifier_expression)){
-        ScmObject operator = lookup_syntax(runtime_env, ref_car(identifier_expression));
-        if (operator && built_in_syntax_p(operator)){
-            switch (ref_object_value(operator)){
-                case SYNTAX_LAMBDA_ID:
-                break;
-            }
-        }else{
-            ScmObject res = make_pair(controller, null_object, null_object);
-            ScmObject  cell = identifier_expression;
-            scm_object res_cell = res;
-            while (!null_p(cell)){
-                set_cdr(res_cell,
-                        make_pair(controller, solve_syntax_internal(controller, ref_car(cell), runtime_env, syntax_env, counter), null_object));
-                res_cell = ref_cdr(res_cell);
-                cell = ref_cdr(cell);
-            }
-            return ref_cdr(res);
-        }
-    }else{
-        return identifier_expression;
-    }
-    assert(0);
-}
-
-ScmObject solve_syntax(cactus_runtime_controller controller, ScmObject identifier_expression){
-
-    ScmObject runtime_env = controller-> macro_env;
-    ScmObject res = solve_syntax_internal(controller, identifier_expression, runtime_env, runtime_env, make_fixnum(controller, 0));
-    return res;
-}
-
-
 
 ScmObject call_eval_step(cactus_runtime_controller controller, scm_object solved_syntax_expression){
     scm_object next = solved_syntax_expression;
@@ -431,17 +380,6 @@ static ScmObject eval_define_lirary(cactus_runtime_controller controller,
 }
 */
 
-ScmObject convert_symbols_to_identifiers(cactus_runtime_controller controller, ScmObject expression){
-    if (pair_p(expression)){
-        return make_pair(controller,
-                         convert_symbols_to_identifiers(controller, ref_car(expression)),
-                         convert_symbols_to_identifiers(controller, ref_cdr(expression)));
-    }else if (symbol_p(expression)){
-        return make_identifier(controller, expression, false_object, false_object);
-    }else{
-        return expression;
-    }
-}
 
 scm_object eval(cactus_runtime_controller controller, scm_object expression){
     controller->eval_stack = null_object;
@@ -456,7 +394,8 @@ scm_object eval(cactus_runtime_controller controller, scm_object expression){
     }else{
         ScmObject identifier_expression = convert_symbols_to_identifiers(controller, expression);
         ScmObject expanded_expression = solve_syntax(controller, identifier_expression);
-        return expanded_expression;
+        return call_eval_step(controller, expanded_expression);
+        //return expanded_expression;
         /*
         ScmObject solved_syntax_expression = solve_syntax(controller, expression);
         simple_write(stdout, solved_syntax_expression);printf("\n");

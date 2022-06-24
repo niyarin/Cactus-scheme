@@ -114,6 +114,7 @@ typedef scm_object (*primitive_procedure)(cactus_runtime_controller,int, scm_obj
 #define TYPE_CHAR 12
 #define TYPE_STRING 13
 #define TYPE_IDENTIFIER 14
+#define TYPE_LABEL 15
 
 #define SYNTAX_QUOTE_ID 0
 #define SYNTAX_LAMBDA_ID 1
@@ -140,7 +141,8 @@ int built_in_syntax_p(scm_object object);
 
 //pair
 scm_object make_pair(cactus_runtime_controller controller, scm_object car, scm_object cdr);
-scm_object make_list2(cactus_runtime_controller controller, ScmObject obj1, ScmObject obj2);
+ScmObject make_list2(cactus_runtime_controller controller, ScmObject obj1, ScmObject obj2);
+ScmObject make_list3(cactus_runtime_controller controller, ScmObject obj1, ScmObject obj2, ScmObject obj3);
 scm_object ref_car(scm_object pair);
 #define ref_cadr(pair) ref_car(ref_cdr(pair))
 #define ref_cddr(pair) ref_cdr(ref_cdr(pair))
@@ -180,6 +182,7 @@ int string_p(scm_object object);
 ScmIdentifier make_identifier(cactus_runtime_controller controller, scm_symbol symbol, ScmObject mark, ScmObject label);
 int identifier_p(scm_object object);
 ScmObject ref_identifier_symbol(ScmObject identifier);
+ScmObject make_label(cactus_runtime_controller controller);
 
 //compare
 ScmObject eq(ScmObject a, ScmObject b);

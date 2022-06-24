@@ -12,11 +12,21 @@ scm_object make_pair(cactus_runtime_controller controller, scm_object car, scm_o
     return make_scm_object(controller, TYPE_PAIR, (uintptr_t)cell);
 }
 
-scm_object make_list2(cactus_runtime_controller controller,
+ScmObject make_list2(cactus_runtime_controller controller,
                       ScmObject obj1,
                       ScmObject obj2){
     return make_pair(controller, obj1, make_pair(controller, obj2, null_object));
 }
+
+ScmObject make_list3(cactus_runtime_controller controller,
+                     ScmObject obj1,
+                     ScmObject obj2,
+                     ScmObject obj3){
+
+    return make_pair(controller, obj1, make_list2(controller, obj2, obj3));
+}
+
+
 
 scm_object ref_car(scm_object pair){
     assert(pair_p(pair));
